@@ -60,3 +60,11 @@ func GetConfigFileExecutor() config.File {
 	})
 	return configFileExecutor
 }
+
+// InitFileConfig 使用配置文件初始化
+func InitFileConfig() *config.AppConfig {
+	if initConfig, err := InitConfig(nil); err == nil {
+		return initConfig
+	}
+	return nil
+}
