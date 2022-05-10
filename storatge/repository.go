@@ -1,4 +1,4 @@
-package storatge
+package storage
 
 import (
 	"github.com/apollogoClient/v1/agache"
