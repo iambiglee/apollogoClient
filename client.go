@@ -2,6 +2,7 @@ package agollo
 
 import (
 	"github.com/apollogoClient/v1/agache"
+	"github.com/apollogoClient/v1/component/serverlist"
 	"github.com/apollogoClient/v1/env"
 	"github.com/apollogoClient/v1/env/config"
 	storage "github.com/apollogoClient/v1/storatge"
@@ -30,6 +31,10 @@ type internalClient struct {
 	cache             *storage.Cache
 }
 
+func (c *internalClient) getAppConfig() config.AppConfig {
+	return *c.appConfig
+}
+
 func StartWithConfig(loadAppConfig func() (*config.AppConfig, error)) (Client, error) {
 	//这里写了这么多，就是想找个合适的方法，获取到配置文件
 	appConfig, err := env.InitConfig(loadAppConfig)
@@ -43,7 +48,9 @@ func StartWithConfig(loadAppConfig func() (*config.AppConfig, error)) (Client, e
 	}
 	c.cache = storage.CreateNamespaceConfig(appConfig.NamespaceName)
 	appConfig.Init()
+	serverlist.InitSyncServerIPList(c.getAppConfig)
 
+	return nil, err
 }
 
 //create TODO 这里不清楚为什么要用&，以及括号里面为什么是两个一样的东西

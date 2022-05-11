@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"github.com/apollogoClient/v1/utils"
+	"net/url"
 	"strings"
 	"sync"
 )
@@ -33,6 +36,14 @@ type AppConfig struct {
 	currentConnApolloConfig *CurrentApolloConfig
 }
 
+// ServerInfo Apollo 服务器信息
+type ServerInfo struct {
+	AppName     string `json:"appName"`
+	InstanceID  string `json:"instanceID"`
+	HomepageURL string `json:"homepageURL"`
+	IsDone      bool   `json:"-"`
+}
+
 // map[string]int64
 type notificationsMap struct {
 	notifications sync.Map
@@ -50,6 +61,28 @@ func (a *AppConfig) initAllNotifications(callback func(namespace string)) {
 	a.notificationsMap = &notificationsMap{
 		notifications: ns,
 	}
+}
+
+// GetServicesConfigURL 获取API的地址
+//TODO fmt.Sprintf是个啥子
+func (a *AppConfig) GetServicesConfigURL() string {
+	return fmt.Sprintf("%sservices/config?appId=%s&ip=%s",
+		a.GetHost(),
+		url.QueryEscape(a.AppID),
+		utils.GetInternal())
+}
+
+// GetHost 获取http 地址
+// TODO 为什么要这么做
+func (a *AppConfig) GetHost() string {
+	u, err := url.Parse(a.IP)
+	if err != nil {
+		return a.IP
+	}
+	if !strings.HasSuffix(u.Path, "/") {
+		return u.String() + "/"
+	}
+	return u.String()
 }
 
 //SplitNamespaces 根据namespace字符串分割后，并执行callback函数
