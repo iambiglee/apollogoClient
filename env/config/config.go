@@ -64,7 +64,7 @@ func (a *AppConfig) initAllNotifications(callback func(namespace string)) {
 }
 
 // GetServicesConfigURL 获取API的地址
-//TODO fmt.Sprintf是个啥子
+// fmt.Sprintf是个啥子，理解为%s 替换为后面的参数
 func (a *AppConfig) GetServicesConfigURL() string {
 	return fmt.Sprintf("%sservices/config?appId=%s&ip=%s",
 		a.GetHost(),
@@ -73,7 +73,7 @@ func (a *AppConfig) GetServicesConfigURL() string {
 }
 
 // GetHost 获取http 地址
-// TODO 为什么要这么做
+// 为什么要这么做,这是strings的标准包
 func (a *AppConfig) GetHost() string {
 	u, err := url.Parse(a.IP)
 	if err != nil {

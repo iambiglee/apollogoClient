@@ -22,7 +22,7 @@ type Cache struct {
 }
 
 // CreateNamespaceConfig 根据namespace初始化goClient 内部配置
-//TODO SplitNamespaces() 是个什么原理
+//SplitNamespaces() 是个什么原理：利用参数就是一个接口的方式，直接通过方法实现方法
 func CreateNamespaceConfig(namespace string) *Cache {
 	var apolloConfigCache sync.Map
 	config.SplitNamespaces(namespace, func(namespace string) {
