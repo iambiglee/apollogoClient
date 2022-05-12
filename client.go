@@ -53,7 +53,9 @@ func StartWithConfig(loadAppConfig func() (*config.AppConfig, error)) (Client, e
 	return nil, err
 }
 
-//create TODO 这里不清楚为什么要用&，以及括号里面为什么是两个一样的东西
+//create
+//这里不清楚为什么要用&，以及括号里面为什么是两个一样的东西
+//应为，如果返回值是一个*， 那么return 就要是内存地址
 func create() *internalClient {
 	appConfig := env.InitFileConfig()
 	return &internalClient{
