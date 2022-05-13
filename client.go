@@ -8,6 +8,8 @@ import (
 	storage "github.com/apollogoClient/v1/storatge"
 )
 
+var syncApolloConfig = remote.CreateSyncApolloConfig()
+
 type Client interface {
 	GetConfig(namespace string) *storage.Config
 	GetConfigAndInit(namespace string) *storage.Config
@@ -49,6 +51,9 @@ func StartWithConfig(loadAppConfig func() (*config.AppConfig, error)) (Client, e
 	c.cache = storage.CreateNamespaceConfig(appConfig.NamespaceName)
 	appConfig.Init()
 	serverlist.InitSyncServerIPList(c.getAppConfig)
+
+	//fist sync
+	configs := syncApolloConfig.Sync(c.getAppConfig())
 
 	return nil, err
 }
