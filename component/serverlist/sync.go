@@ -77,7 +77,9 @@ func SyncServerIPListSuccessCallBack(responseBody []byte, callback http.CallBack
 }
 
 // InitSyncServerIPList 初始化同步服务器信息列表
-// TODO 但是下面用了& 是什么意思？
+// 但是下面用了& 是什么意思？
+//&是为了new 一个对象，这么写也就是调用对象里面的start方法，但是为什么要这么做？
+//为了保持appconfig里面的数据
 func InitSyncServerIPList(appConfig func() config.AppConfig) {
 	go component.StartRefreshConfig(&SyncServerIPListComponent{appConfig})
 }

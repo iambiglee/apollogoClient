@@ -38,7 +38,8 @@ var (
 )
 
 // CallBack 请求回调函数
-// TODO 这里面又是接口的又是回调的，是什么东西？第三行是个什么意思?
+// 这里面又是接口的又是回调的，是什么东西？第三行是个什么意思?
+//可以理解为一个接口，但是只能在这里使用，没有通用性
 type CallBack struct {
 	SuccessCallBack   func([]byte, CallBack) (interface{}, error)
 	NotModifyCallBack func() error
@@ -47,9 +48,9 @@ type CallBack struct {
 }
 
 // Request 建立网络请求,这里只是建立的IP连接，长连接？
-// TODO 第二行的等于接口指针是什么？url2是什么思想感情
-//TODO strings 和 url 包是什么
-//TODO callBack 是什么
+// 第二行的等于接口指针是什么？url2是什么思想感情，new 一个对象呗
+//strings 和 url 包是什么 : 同名包呗，
+//callBack 是什么，自定义的接口实现，用来做子任务
 func Request(requestURL string, connectionConfig *env.ConnectConfig, callback *CallBack) (interface{}, error) {
 	client := &http.Client{}
 	if connectionConfig != nil && connectionConfig.Timeout != 0 {
@@ -108,7 +109,7 @@ func Request(requestURL string, connectionConfig *env.ConnectConfig, callback *C
 		}
 
 		//处理这种返回结果
-		//TODO 这个下面的callback 是怎么回事
+		//这个下面的callback 是怎么回事，接口类，用来做任务实现，类似runable
 		switch res.StatusCode {
 		case http.StatusOK:
 			responseBody, err := ioutil.ReadAll(req.Body)
@@ -138,7 +139,7 @@ func Request(requestURL string, connectionConfig *env.ConnectConfig, callback *C
 }
 
 //getDefaultTransport 这里又是做什么的，获取http 连接？
-//TODO DialContext 的写法怎么这么夸张
+// DialContext 的写法怎么这么夸张,new一个对象而已，没有什么好夸张的
 func getDefaultTransport(insecureSkipVerify bool) *http.Transport {
 	once.Do(func() {
 		defaultTransport = &http.Transport{
