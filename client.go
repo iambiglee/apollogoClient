@@ -2,6 +2,7 @@ package agollo
 
 import (
 	"github.com/apollogoClient/v1/agache"
+	"github.com/apollogoClient/v1/component/remote"
 	"github.com/apollogoClient/v1/component/serverlist"
 	"github.com/apollogoClient/v1/env"
 	"github.com/apollogoClient/v1/env/config"

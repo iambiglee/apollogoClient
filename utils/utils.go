@@ -7,6 +7,10 @@ import (
 	"sync"
 )
 
+const (
+	Empty = ""
+)
+
 var (
 	internalIPOnce sync.Once
 	internalIP     = ""

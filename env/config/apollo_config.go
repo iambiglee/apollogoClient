@@ -12,3 +12,9 @@ func CreateCurrentApolloConfig() *CurrentApolloConfig {
 		configs: make(map[string]*ApolloConnConfig, 1),
 	}
 }
+
+// ApolloConfig apollo配置
+type ApolloConfig struct {
+	ApolloConnConfig
+	Configurations map[string]interface{} `json:"configurations"`
+}

@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/apollogoClient/v1/env"
 	"github.com/apollogoClient/v1/env/config"
+	"github.com/apollogoClient/v1/env/server"
 	"github.com/apollogoClient/v1/extension"
+	"github.com/apollogoClient/v1/utils"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -158,4 +160,42 @@ func getDefaultTransport(insecureSkipVerify bool) *http.Transport {
 		}
 	})
 	return defaultTransport
+}
+
+// RequestRecovery TODO go 方法可以不是return作为最后一句吗？
+func RequestRecovery(appConfig config.AppConfig,
+	connectConfig *env.ConnectConfig,
+	callBack *CallBack) (interface{}, error) {
+	var formart = "%s%s"
+	var err error
+	var response interface{}
+
+	for {
+		host := loadBalance(appConfig)
+		if host == "" {
+			return nil, err
+		}
+
+		requsetURL := fmt.Sprintf(formart, host, connectConfig.URI)
+		response, err = Request(requsetURL, connectConfig, callBack)
+		if err == nil {
+			return response, nil
+		}
+		if host == appConfig.GetHost() {
+			return response, nil
+		}
+		server.SetDownNode(host, appConfig.GetHost())
+	}
+}
+
+func loadBalance(appConfig config.AppConfig) string {
+	if server.IsConnectDirectly(appConfig.GetHost()) {
+		return appConfig.GetHost()
+	}
+	serverInfo := extension.GetLoadBalance().Load(server.GetServers(appConfig.GetHost()))
+	if serverInfo == nil {
+		return utils.Empty
+	}
+	return serverInfo.HomepageURL
+
 }
