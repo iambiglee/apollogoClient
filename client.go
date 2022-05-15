@@ -1,6 +1,7 @@
 package agollo
 
 import (
+	"errors"
 	"github.com/apollogoClient/v1/agache"
 	"github.com/apollogoClient/v1/component/remote"
 	"github.com/apollogoClient/v1/component/serverlist"
@@ -54,7 +55,13 @@ func StartWithConfig(loadAppConfig func() (*config.AppConfig, error)) (Client, e
 	serverlist.InitSyncServerIPList(c.getAppConfig)
 
 	//fist sync
-	configs := syncApolloConfig.Sync(c.getAppConfig())
+	configs := syncApolloConfig.Sync(c.getAppConfig)
+	if len(configs) == 0 && appConfig != nil && appConfig.MustStart {
+		return nil, errors.New("no config")
+	}
+	for _, apolloConfig := range configs {
+		c.cache.UpdateApolloConfig(apolloConfig, c.getAppConfig)
+	}
 
 	return nil, err
 }

@@ -38,7 +38,11 @@ func (s syncApolloConfig) CallBack(namespace string) http.CallBack {
 	}
 }
 
-// processJSONFile TODO 返回值可以命名，也可以不命名？60行左右Parse 没有返回值也行？
+func touchApolloConfigCache() error {
+	return nil
+}
+
+// processJSONFile TODO 返回值可以命名，也可以不命名？60行左右Parse 没有返回值也行？Parse是个接口，没有实现类，为什么不报错
 //解析Json, 将key 值返回
 func processJSONFile(bytes []byte, back http.CallBack) (o interface{}, err error) {
 	apolloConfig := &config.ApolloConfig{}
@@ -67,7 +71,7 @@ func processJSONFile(bytes []byte, back http.CallBack) (o interface{}, err error
 	return apolloConfig, nil
 }
 
-func (a syncApolloConfig) Sync(namespace string, appConfigFunc func() config.AppConfig) []*config.ApolloConfig {
+func (a syncApolloConfig) Sync(appConfigFunc func() config.AppConfig) []*config.ApolloConfig {
 	appConfig := appConfigFunc()
 	configs := make([]*config.ApolloConfig, 0, 8)
 	config.SplitNamespaces(appConfig.NamespaceName, func(namespace string) {
@@ -81,6 +85,8 @@ func (a syncApolloConfig) Sync(namespace string, appConfigFunc func() config.App
 	return configs
 }
 
+// CreateSyncApolloConfig 创建同步获取 Apollo 配置
+//TODO 这里报错为什么要说没有实现类
 func CreateSyncApolloConfig() ApolloConfig {
 	a := &syncApolloConfig{}
 	a.remoteApollo = a

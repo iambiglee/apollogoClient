@@ -14,11 +14,11 @@ type ApolloConfig interface {
 	GetSyncURI(config config.AppConfig, namespaceName string) string
 
 	//Sync 同步获取Apollo 配置
-	Sync(appConfigFunc func() config.AppConfig) []*config.AppConfig
+	Sync(appConfigFunc func() config.AppConfig) []*config.ApolloConfig
 
 	// CallBack 根据namespace获取callback数据
 	CallBack(namespace string) http.CallBack
 
 	// SyncWithNamespace 通过namespace 同步Apollo
-	SyncWithNamespace(namespace string, appConfigFunc func() config.AppConfig) *config.AppConfig
+	SyncWithNamespace(namespace string, appConfigFunc func() config.AppConfig) *config.ApolloConfig
 }
