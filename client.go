@@ -3,11 +3,13 @@ package agollo
 import (
 	"errors"
 	"github.com/apollogoClient/v1/agache"
+	"github.com/apollogoClient/v1/component"
+	"github.com/apollogoClient/v1/component/notify"
 	"github.com/apollogoClient/v1/component/remote"
 	"github.com/apollogoClient/v1/component/serverlist"
 	"github.com/apollogoClient/v1/env"
 	"github.com/apollogoClient/v1/env/config"
-	storage "github.com/apollogoClient/v1/storatge"
+	storage "github.com/apollogoClient/v1/storage"
 )
 
 var syncApolloConfig = remote.CreateSyncApolloConfig()
@@ -33,6 +35,86 @@ type internalClient struct {
 	initAppConfigFunc func() (*config.AppConfig, error)
 	appConfig         *config.AppConfig
 	cache             *storage.Cache
+}
+
+func (c *internalClient) GetConfig(namespace string) *storage.Config {
+	return c.GetConfigAndInit(namespace)
+}
+
+//GetConfigAndInit 根据namespace获取apollo配置
+func (c *internalClient) GetConfigAndInit(namespace string) *storage.Config {
+	if namespace == "" {
+		return nil
+	}
+
+	config := c.cache.GetConfig(namespace)
+
+	if config == nil {
+		//init cache
+		storage.CreateNamespaceConfig(namespace)
+
+		//sync config
+		syncApolloConfig.SyncWithNamespace(namespace, c.getAppConfig)
+	}
+
+	config = c.cache.GetConfig(namespace)
+
+	return config
+}
+
+func (c *internalClient) GetConfigCache(namespace string) agache.CacheInterface {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *internalClient) GetDefaultConfigCache() agache.CacheInterface {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *internalClient) GetApolloConfigCache() agache.CacheInterface {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *internalClient) GetValue(key string) string {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *internalClient) GetStringValue(key string, defaultValue string) string {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *internalClient) GetIntValue(key string, defaultValue int) int {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *internalClient) GetFloatValue(key string, defaultValue float64) float64 {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *internalClient) GetBoolValue(key string, defaultValue bool) bool {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *internalClient) GetStringSliceValue(key string, defaultValue []string) []string {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *internalClient) AddChangeListener(listener storage.ChangeListener) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *internalClient) RemoveChangeListener(listener storage.ChangeListener) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (c *internalClient) getAppConfig() config.AppConfig {
@@ -63,7 +145,12 @@ func StartWithConfig(loadAppConfig func() (*config.AppConfig, error)) (Client, e
 		c.cache.UpdateApolloConfig(apolloConfig, c.getAppConfig)
 	}
 
-	return nil, err
+	//开始长轮训
+	configComponent := &notify.ConfigComponent{}
+	configComponent.SetAppConfig(c.getAppConfig)
+	configComponent.SetCache(c.cache)
+	go component.StartRefreshConfig(configComponent)
+	return c, err
 }
 
 //create

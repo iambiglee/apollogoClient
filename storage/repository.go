@@ -74,7 +74,7 @@ func (c *Cache) UpdateApolloConfigCache(configurations map[string]interface{}, t
 }
 
 // GetConfig 根据namespace 获取Apollo配置
-//TODO 为什么* 在里面
+// 为什么* 在里面，为什么指定的Cache前面要有一个*,因为方法也是值传递，可以吧原来的cache 对象传递过来
 func (c *Cache) GetConfig(namespace string) *Config {
 	if namespace == "" {
 		return nil
