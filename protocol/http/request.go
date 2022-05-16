@@ -162,11 +162,11 @@ func getDefaultTransport(insecureSkipVerify bool) *http.Transport {
 	return defaultTransport
 }
 
-// RequestRecovery TODO go 方法可以不是return作为最后一句吗？
+// RequestRecovery 不能是
 func RequestRecovery(appConfig config.AppConfig,
 	connectConfig *env.ConnectConfig,
 	callBack *CallBack) (interface{}, error) {
-	var formart = "%s%s"
+	var format = "%s%s"
 	var err error
 	var response interface{}
 
@@ -176,7 +176,7 @@ func RequestRecovery(appConfig config.AppConfig,
 			return nil, err
 		}
 
-		requsetURL := fmt.Sprintf(formart, host, connectConfig.URI)
+		requsetURL := fmt.Sprintf(format, host, connectConfig.URI)
 		response, err = Request(requsetURL, connectConfig, callBack)
 		if err == nil {
 			return response, nil
