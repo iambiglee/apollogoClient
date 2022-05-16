@@ -18,3 +18,9 @@ type ApolloConfig struct {
 	ApolloConnConfig
 	Configurations map[string]interface{} `json:"configurations"`
 }
+
+func (c *CurrentApolloConfig) Set(namespace string, config *ApolloConnConfig) {
+	c.l.Lock()
+	defer c.l.Unlock()
+	c.configs[namespace] = config
+}

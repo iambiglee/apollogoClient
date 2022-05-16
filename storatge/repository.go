@@ -21,6 +21,15 @@ type Cache struct {
 	ChangeListener    *list.List
 }
 
+const (
+	//1 minute
+	configCacheExpireTime = 120
+
+	defaultNamespace = "application"
+
+	propertiesFormat = "%s=%v\n"
+)
+
 // CreateNamespaceConfig 根据namespace初始化goClient 内部配置
 //SplitNamespaces() 是个什么原理：利用参数就是一个接口的方式，直接通过方法实现方法
 func CreateNamespaceConfig(namespace string) *Cache {
@@ -46,4 +55,33 @@ func initConfig(namespace string, factory agache.CacheFactory) *Config {
 	c.isInit.Store(false)
 	c.waitInit.Add(1)
 	return c
+}
+
+// UpdateApolloConfig config.Appconfig为什么这不能用*，为什么这里要用方法
+//根据 config server 返回的内容更新并判断是否要写备份文件
+func (c *Cache) UpdateApolloConfig(apolloConfig *config.ApolloConfig, appConfigFunc func() config.AppConfig) {
+	if apolloConfig == nil {
+		return
+	}
+	appConfig := appConfigFunc()
+	appConfig.SetCurrentApolloConfig(&apolloConfig.ApolloConnConfig)
+	c.UpdateApolloConfigCache(apolloConfig.Configurations, configCacheExpireTime, apolloConfig.NamespaceName)
+}
+
+//UpdateApolloConfigCache 根据conf[ig server返回的内容更新内存
+func (c *Cache) UpdateApolloConfigCache(configurations map[string]interface{}, time int, namespace string) {
+	c.GetConfig(namespace)
+}
+
+// GetConfig 根据namespace 获取Apollo配置
+//TODO 为什么* 在里面
+func (c *Cache) GetConfig(namespace string) *Config {
+	if namespace == "" {
+		return nil
+	}
+	config, ok := c.apolloConfigCache.Load(namespace)
+	if !ok {
+		return nil
+	}
+	return config.(*Config)
 }

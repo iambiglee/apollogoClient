@@ -99,6 +99,11 @@ func SplitNamespaces(name string, callback func(namespace string)) sync.Map {
 
 }
 
+// SetCurrentApolloConfig nolint
+func (a *AppConfig) SetCurrentApolloConfig(apolloConfig *ApolloConnConfig) {
+	a.currentConnApolloConfig.Set(apolloConfig.NamespaceName, apolloConfig)
+}
+
 type File interface {
 	Load(fileName string, unmarshal func([]byte) (interface{}, error)) (interface{}, error)
 	Write(content interface{}, configPath string) error
