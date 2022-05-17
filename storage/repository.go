@@ -2,10 +2,12 @@ package storage
 
 import (
 	"container/list"
+	"fmt"
 	"github.com/apollogoClient/v1/agache"
 	"github.com/apollogoClient/v1/env/config"
 	"github.com/apollogoClient/v1/extension"
 	"github.com/apollogoClient/v1/utils"
+	"reflect"
 	"sync"
 	"sync/atomic"
 )
@@ -67,18 +69,79 @@ func (c *Cache) UpdateApolloConfig(apolloConfig *config.ApolloConfig, appConfigF
 	}
 	appConfig := appConfigFunc()
 	appConfig.SetCurrentApolloConfig(&apolloConfig.ApolloConnConfig)
-	c.UpdateApolloConfigCache(apolloConfig.Configurations, configCacheExpireTime, apolloConfig.NamespaceName)
-	appConfig.GetNotificationsMap().GetNotify(apolloConfig.NamespaceName)
-
+	//cache := c.UpdateApolloConfigCache
+	//cache(apolloConfig.Configurations, configCacheExpireTime, apolloConfig.NamespaceName)
+	//appConfig.GetNotificationsMap().GetNotify(apolloConfig.NamespaceName)
+	changeList := c.UpdateApolloConfigCache(apolloConfig.Configurations, configCacheExpireTime, apolloConfig.NamespaceName)
+	notify := appConfig.GetNotificationsMap().GetNotify(apolloConfig.NamespaceName)
+	c.pushNewestChanges(apolloConfig.NamespaceName, apolloConfig.Configurations, notify)
+	if len(changeList) > 0 {
+		event := createConfigChangeEvent(changeList, apolloConfig.NamespaceName, notify)
+		c.pushChangeEvent(event)
+	}
+	if appConfig.GetIsBackupConfig() {
+		//异步写入配置文件
+		apolloConfig.AppID = appConfig.AppID
+		go extension.GetFileHandler().WriteConfigFile(apolloConfig, appConfig.GetBackupConfigPath())
+	}
 }
 
 //UpdateApolloConfigCache 根据conf[ig server返回的内容更新内存
-func (c *Cache) UpdateApolloConfigCache(configurations map[string]interface{}, time int, namespace string) {
+func (c *Cache) UpdateApolloConfigCache(configurations map[string]interface{}, time int, namespace string) map[string]*ConfigChange {
 	config := c.GetConfig(namespace)
 	if config == nil {
 		config = initConfig(namespace, extension.GetCacheFactory())
 		c.apolloConfigCache.Store(namespace, config)
 	}
+	isInit := false
+
+	defer func(c *Config) {
+		if !isInit {
+			return
+		}
+		b := c.GetIsInit()
+		if b {
+			return
+		}
+		c.isInit.Store(isInit)
+		c.waitInit.Done()
+	}(config)
+	if (configurations == nil || len(configurations) == 0) && config.cache.EntryCount() == 0 {
+		return nil
+	}
+
+	mp := map[string]bool{}
+	config.cache.Range(func(key, value interface{}) bool {
+		mp[key.(string)] = true
+		return true
+	})
+	changes := make(map[string]*ConfigChange)
+	if configurations != nil {
+		for key, value := range configurations {
+			if !mp[key] {
+				changes[key] = createAddConfigChange(value)
+			} else {
+				//update
+				oldValue, _ := config.cache.Get(key)
+				if !reflect.DeepEqual(oldValue, value) {
+					changes[key] = createModifyConfigChange(oldValue, value)
+				}
+			}
+			err := config.cache.Set(key, value, time)
+			if err != nil {
+				fmt.Errorf("key:%s,value:%s is error", key, value)
+			}
+			delete(mp, key)
+		}
+	}
+	for key := range mp {
+		oldValue, _ := config.cache.Get(key)
+		changes[key] = createDeletedConfigChange(oldValue)
+
+		config.cache.Del(key)
+	}
+	isInit = true
+	return changes
 
 }
 
@@ -113,6 +176,35 @@ func (c *Cache) RemoveChangeListener(listener ChangeListener) {
 			c.ChangeListener.Remove(i)
 		}
 	}
+}
+
+func (c *Cache) pushNewestChanges(name string, configurations map[string]interface{}, notify int64) {
+	e := &FullChangeEvent{
+		Changes: configurations,
+	}
+	e.Namespace = name
+	e.NotificationID = notify
+	c.pushChange(func(listener ChangeListener) {
+		go listener.OnNewestChange(e)
+	})
+
+}
+
+//TODO 为什么这里Func里面可以不写变量名，
+func (c *Cache) pushChange(f func(ChangeListener)) {
+	if c.ChangeListener == nil || c.ChangeListener.Len() == 0 {
+		return
+	}
+	for i := c.ChangeListener.Front(); i != nil; i = i.Next() {
+		listener := i.Value.(ChangeListener)
+		f(listener)
+	}
+}
+
+func (c *Cache) pushChangeEvent(event *ChangeEvent) {
+	c.pushChange(func(listener ChangeListener) {
+		go listener.OnChange(event)
+	})
 }
 
 func (c *Config) GetCache() agache.CacheInterface {

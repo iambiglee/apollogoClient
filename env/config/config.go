@@ -121,3 +121,11 @@ type File interface {
 	Load(fileName string, unmarshal func([]byte) (interface{}, error)) (interface{}, error)
 	Write(content interface{}, configPath string) error
 }
+
+func (a *AppConfig) GetIsBackupConfig() bool {
+	return a.IsBackupConfig
+}
+
+func (a *AppConfig) GetBackupConfigPath() string {
+	return a.BackupConfigPath
+}
