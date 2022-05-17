@@ -60,6 +60,7 @@ func initConfig(namespace string, factory agache.CacheFactory) *Config {
 
 // UpdateApolloConfig config.Appconfig为什么这不能用*，为什么这里要用方法
 //根据 config server 返回的内容更新并判断是否要写备份文件
+//TODO 这里没写完
 func (c *Cache) UpdateApolloConfig(apolloConfig *config.ApolloConfig, appConfigFunc func() config.AppConfig) {
 	if apolloConfig == nil {
 		return
@@ -67,11 +68,18 @@ func (c *Cache) UpdateApolloConfig(apolloConfig *config.ApolloConfig, appConfigF
 	appConfig := appConfigFunc()
 	appConfig.SetCurrentApolloConfig(&apolloConfig.ApolloConnConfig)
 	c.UpdateApolloConfigCache(apolloConfig.Configurations, configCacheExpireTime, apolloConfig.NamespaceName)
+	appConfig.GetNotificationsMap().GetNotify(apolloConfig.NamespaceName)
+
 }
 
 //UpdateApolloConfigCache 根据conf[ig server返回的内容更新内存
 func (c *Cache) UpdateApolloConfigCache(configurations map[string]interface{}, time int, namespace string) {
-	c.GetConfig(namespace)
+	config := c.GetConfig(namespace)
+	if config == nil {
+		config = initConfig(namespace, extension.GetCacheFactory())
+		c.apolloConfigCache.Store(namespace, config)
+	}
+
 }
 
 // GetConfig 根据namespace 获取Apollo配置

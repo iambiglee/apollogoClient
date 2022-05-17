@@ -49,6 +49,15 @@ type notificationsMap struct {
 	notifications sync.Map
 }
 
+func (m notificationsMap) GetNotify(name string) int64 {
+	value, ok := m.notifications.Load(name)
+	if !ok || value == nil {
+		return 0
+	}
+	return value.(int64)
+
+}
+
 // Init 初始化 notificationsMap
 func (a *AppConfig) Init() {
 	a.currentConnApolloConfig = CreateCurrentApolloConfig()
@@ -102,6 +111,10 @@ func SplitNamespaces(name string, callback func(namespace string)) sync.Map {
 // SetCurrentApolloConfig nolint
 func (a *AppConfig) SetCurrentApolloConfig(apolloConfig *ApolloConnConfig) {
 	a.currentConnApolloConfig.Set(apolloConfig.NamespaceName, apolloConfig)
+}
+
+func (a *AppConfig) GetNotificationsMap() *notificationsMap {
+	return a.notificationsMap
 }
 
 type File interface {

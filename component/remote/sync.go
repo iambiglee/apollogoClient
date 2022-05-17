@@ -71,6 +71,7 @@ func processJSONFile(bytes []byte, back http.CallBack) (o interface{}, err error
 	return apolloConfig, nil
 }
 
+//配置信息的优先级：Apollo-->Local File.都没有就报错
 func (a syncApolloConfig) Sync(appConfigFunc func() config.AppConfig) []*config.ApolloConfig {
 	appConfig := appConfigFunc()
 	configs := make([]*config.ApolloConfig, 0, 8)
