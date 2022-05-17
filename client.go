@@ -62,59 +62,57 @@ func (c *internalClient) GetConfigAndInit(namespace string) *storage.Config {
 	return config
 }
 
+//GetConfigCache 根据namespace获取apollo配置的缓存
 func (c *internalClient) GetConfigCache(namespace string) agache.CacheInterface {
-	//TODO implement me
-	panic("implement me")
+	config := c.GetConfigAndInit(namespace)
+	if config == nil {
+		return nil
+	}
+	return config.GetCache()
 }
 
 func (c *internalClient) GetDefaultConfigCache() agache.CacheInterface {
-	//TODO implement me
-	panic("implement me")
+	configAndInit := c.GetConfigAndInit(storage.GetDefaultNamespace())
+	if configAndInit != nil {
+		return configAndInit.GetCache()
+	}
+	return nil
 }
 
 func (c *internalClient) GetApolloConfigCache() agache.CacheInterface {
-	//TODO implement me
-	panic("implement me")
+	return c.GetDefaultConfigCache()
 }
 
 func (c *internalClient) GetValue(key string) string {
-	//TODO implement me
-	panic("implement me")
+	return c.GetConfig(storage.GetDefaultNamespace()).GetValue(key)
 }
 
 func (c *internalClient) GetStringValue(key string, defaultValue string) string {
-	//TODO implement me
-	panic("implement me")
+	return c.GetConfig(storage.GetDefaultNamespace()).GetStringValue(key)
 }
 
 func (c *internalClient) GetIntValue(key string, defaultValue int) int {
-	//TODO implement me
-	panic("implement me")
+	return c.GetConfig(storage.GetDefaultNamespace()).GetIntValue(key, defaultValue)
 }
 
 func (c *internalClient) GetFloatValue(key string, defaultValue float64) float64 {
-	//TODO implement me
-	panic("implement me")
+	return c.GetConfig(storage.GetDefaultNamespace()).GetFloatValue(key, defaultValue)
 }
 
 func (c *internalClient) GetBoolValue(key string, defaultValue bool) bool {
-	//TODO implement me
-	panic("implement me")
+	return c.GetConfig(storage.GetDefaultNamespace()).GetBoolValue(key, defaultValue)
 }
 
 func (c *internalClient) GetStringSliceValue(key string, defaultValue []string) []string {
-	//TODO implement me
-	panic("implement me")
+	return c.GetConfig(storage.GetDefaultNamespace()).GetStringSliceValue(key, defaultValue)
 }
 
 func (c *internalClient) AddChangeListener(listener storage.ChangeListener) {
-	//TODO implement me
-	panic("implement me")
+	c.cache.AddChangeListener(listener)
 }
 
 func (c *internalClient) RemoveChangeListener(listener storage.ChangeListener) {
-	//TODO implement me
-	panic("implement me")
+	c.cache.RemoveChangeListener(listener)
 }
 
 func (c *internalClient) getAppConfig() config.AppConfig {

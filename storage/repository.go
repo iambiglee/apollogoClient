@@ -5,6 +5,7 @@ import (
 	"github.com/apollogoClient/v1/agache"
 	"github.com/apollogoClient/v1/env/config"
 	"github.com/apollogoClient/v1/extension"
+	"github.com/apollogoClient/v1/utils"
 	"sync"
 	"sync/atomic"
 )
@@ -84,4 +85,141 @@ func (c *Cache) GetConfig(namespace string) *Config {
 		return nil
 	}
 	return config.(*Config)
+}
+
+func (c *Cache) AddChangeListener(listener ChangeListener) {
+	if listener == nil {
+		return
+	}
+	c.ChangeListener.PushBack(listener)
+}
+
+//RemoveChangeListener 增加变更监控
+func (c *Cache) RemoveChangeListener(listener ChangeListener) {
+	if listener == nil {
+		return
+	}
+	for i := c.ChangeListener.Front(); i != nil; i = i.Next() {
+		apolloListener := i.Value.(ChangeListener)
+		if listener == apolloListener {
+			c.ChangeListener.Remove(i)
+		}
+	}
+}
+
+func (c *Config) GetCache() agache.CacheInterface {
+	return c.cache
+}
+
+func GetDefaultNamespace() string {
+	return defaultNamespace
+}
+
+func (c *Config) GetValue(key string) string {
+	value := c.getConfigValue(key)
+	if value == nil {
+		return utils.Empty
+	}
+
+	v, ok := value.(string)
+	if !ok {
+		return utils.Empty
+	}
+	return v
+}
+
+//
+func (c *Config) getConfigValue(key string) interface{} {
+	b := c.GetIsInit()
+	if !b {
+		c.waitInit.Wait()
+	}
+	if c.cache == nil {
+		return nil
+	}
+	value, err := c.cache.Get(key)
+	if err != nil {
+		return nil
+	}
+	return value
+
+}
+
+func (c *Config) GetIsInit() bool {
+	return c.isInit.Load().(bool)
+}
+
+func (c *Config) GetStringValue(key string) string {
+	value := c.GetValue(key)
+	return value
+}
+
+//GetIntValue 获取配置值（int），获取不到则取默认值
+func (c *Config) GetIntValue(key string, defaultValue int) int {
+	value := c.getConfigValue(key)
+
+	if value == nil {
+		return defaultValue
+	}
+	v, ok := value.(int)
+	if !ok {
+		return defaultValue
+	}
+	return v
+}
+
+//GetFloatValue 获取配置值（float），获取不到则取默认值
+func (c *Config) GetFloatValue(key string, defaultValue float64) float64 {
+	value := c.getConfigValue(key)
+
+	if value == nil {
+		return defaultValue
+	}
+
+	v, ok := value.(float64)
+	if !ok {
+		return defaultValue
+	}
+	return v
+}
+
+//GetBoolValue 获取配置值（bool），获取不到则取默认值
+func (c *Config) GetBoolValue(key string, defaultValue bool) bool {
+	value := c.getConfigValue(key)
+	v, ok := value.(bool)
+	if !ok {
+		return defaultValue
+	}
+	return v
+}
+
+func (c *Config) GetStringSliceValue(key string, defaultValue []string) []string {
+	value := c.getConfigValue(key)
+	v, ok := value.([]string)
+	if !ok {
+		return defaultValue
+	}
+	return v
+}
+
+func (c *Config) GetIntSliceValue(key string, defaultValue []int) []int {
+	value := c.getConfigValue(key)
+	v, ok := value.([]int)
+	if !ok {
+		return defaultValue
+	}
+	return v
+}
+
+//GetSliceValue 获取配置值（[]interface)
+func (c *Config) GetSliceValue(key string, defaultValue []interface{}) []interface{} {
+	value := c.getConfigValue(key)
+	if value == nil {
+		return defaultValue
+	}
+	v, ok := value.([]interface{})
+	if !ok {
+		return defaultValue
+	}
+	return v
 }
