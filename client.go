@@ -148,6 +148,7 @@ func StartWithConfig(loadAppConfig func() (*config.AppConfig, error)) (Client, e
 	configComponent.SetAppConfig(c.getAppConfig)
 	configComponent.SetCache(c.cache)
 	go component.StartRefreshConfig(configComponent)
+
 	return c, err
 }
 
