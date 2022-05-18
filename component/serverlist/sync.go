@@ -52,7 +52,7 @@ func SyncServerIPList(appConfigFunc func() config.AppConfig) (map[string]*config
 
 // SyncServerIPListSuccessCallBack 同步服务器成功之后的回调
 //json的Unmarshal用法,就是这么用的，传递一个指针进去
-//TODO 这里要CallBack 做什么？-->没有什么作用，可以提交issue
+//注意这种callback写法
 func SyncServerIPListSuccessCallBack(responseBody []byte, callback http.CallBack) (o interface{}, err error) {
 	tmpServerInfo := make([]*config.ServerInfo, 0)
 	err = json.Unmarshal(responseBody, &tmpServerInfo)

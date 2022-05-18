@@ -5,7 +5,7 @@ import (
 	"github.com/apollogoClient/v1/protocol/http"
 )
 
-// ApolloConfig Apollo 配置 TODO 怎么这里又来一个
+// ApolloConfig Apollo 配置
 type ApolloConfig interface {
 	// GetNotifyURLSuffix 获取异步更新路劲
 	GetNotifyURLSuffix(notifications string, config config.AppConfig) string

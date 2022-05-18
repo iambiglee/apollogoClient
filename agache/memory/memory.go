@@ -45,7 +45,7 @@ func (d DefaultCache) Clear() {
 	panic("implement me")
 }
 
-// Create TODO 为什么会自动实现Create方法
+// Create 为什么会自动实现Create方法，因为实现对象的时候，必须要一个实例对象
 func (d DefaultCacheFactory) Create() agache.CacheInterface {
 	return &DefaultCache{}
 }

@@ -12,7 +12,7 @@ import (
 	"path"
 )
 
-// TODO 不用申明名称吗
+// 不用申明名称吗，可以，只要有类型就可以，名字不重要
 type syncApolloConfig struct {
 	AbsApolloConfig
 }
@@ -42,7 +42,8 @@ func touchApolloConfigCache() error {
 	return nil
 }
 
-// processJSONFile TODO 返回值可以命名，也可以不命名？60行左右Parse 没有返回值也行？Parse是个接口，没有实现类，为什么不报错
+// processJSONFile 返回值可以命名，也可以不命名？60行左右Parse 没有返回值也行？Parse是个接口，没有实现类，为什么不报错
+//这里把方法放在map里面了， 所以可以用这种方式运行函数
 //解析Json, 将key 值返回
 func processJSONFile(bytes []byte, back http.CallBack) (o interface{}, err error) {
 	apolloConfig := &config.ApolloConfig{}
@@ -87,7 +88,7 @@ func (a syncApolloConfig) Sync(appConfigFunc func() config.AppConfig) []*config.
 }
 
 // CreateSyncApolloConfig 创建同步获取 Apollo 配置
-//TODO 这里报错为什么要说没有实现类
+//这里报错为什么要说没有实现类，因为这个类里面真的是接口
 func CreateSyncApolloConfig() ApolloConfig {
 	a := &syncApolloConfig{}
 	a.remoteApollo = a

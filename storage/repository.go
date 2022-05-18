@@ -189,7 +189,7 @@ func (c *Cache) pushNewestChanges(name string, configurations map[string]interfa
 
 }
 
-//TODO 为什么这里Func里面可以不写变量名，
+// 为什么这里Func里面可以不写变量名，真的可以不写
 func (c *Cache) pushChange(f func(ChangeListener)) {
 	if c.ChangeListener == nil || c.ChangeListener.Len() == 0 {
 		return
