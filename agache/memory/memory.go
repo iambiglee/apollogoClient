@@ -5,7 +5,9 @@ import (
 	"sync"
 )
 
-// DefaultCacheFactory TODO 空结构体为什么这里面什么都没有
+// DefaultCacheFactory  空结构体为什么这里面什么都没有
+//空结构体是GO语言中的一种使用，情况使用空结构体的考量其实是：根本不关心结构体变量的值。
+//适用于实现Set结构、在 channel 中传输信号,实现方法接收者,实现集合类型，need time to do it
 type DefaultCacheFactory struct {
 }
 
