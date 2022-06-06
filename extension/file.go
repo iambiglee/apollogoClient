@@ -1,6 +1,8 @@
 package extension
 
-import file "github.com/apollogoClient/v1/env/file/json"
+import (
+	"github.com/apollogoClient/v1/env/file"
+)
 
 var fileHandler file.FileHandler
 

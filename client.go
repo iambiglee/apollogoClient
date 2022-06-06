@@ -4,12 +4,14 @@ import (
 	"errors"
 	"github.com/apollogoClient/v1/agache"
 	"github.com/apollogoClient/v1/agache/memory"
+	"github.com/apollogoClient/v1/cluster/roundrobin"
 	"github.com/apollogoClient/v1/component"
 	"github.com/apollogoClient/v1/component/notify"
 	"github.com/apollogoClient/v1/component/remote"
 	"github.com/apollogoClient/v1/component/serverlist"
 	"github.com/apollogoClient/v1/env"
 	"github.com/apollogoClient/v1/env/config"
+	jsonFile "github.com/apollogoClient/v1/env/file/json"
 	"github.com/apollogoClient/v1/extension"
 	storage "github.com/apollogoClient/v1/storage"
 )
@@ -18,6 +20,8 @@ var syncApolloConfig = remote.CreateSyncApolloConfig()
 
 func init() {
 	extension.SetCacheFactory(&memory.DefaultCacheFactory{})
+	extension.SetLoadBalance(&roundrobin.RoundRobin{})
+	extension.SetFileHandler(&jsonFile.FileHandler{})
 }
 
 type Client interface {
